@@ -1,30 +1,32 @@
 import React, { Component } from 'react';
-import Amplify from 'aws-amplify';
-import { withAuthenticator } from 'aws-amplify-react';
+import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
+import Login from './Login';
+import HomeWithAuth from './HomeWithAuth';
+import IDPCallback from './IDPCallback';
+import Amplify from "aws-amplify/lib/index";
 
 Amplify.configure({
     Auth: {
-        identityPoolId: 'us-east-2:0f7ba121-8ac5-4c23-85ba-20b02ee2a7e3',
-        region: 'us-east-2',
-        userPoolId: 'us-east-2_DPov4QPw4',
-        userPoolWebClientId: '7f65ue6qulachuapnj4r3qe8vq'
+        // identityPoolId: 'us-east-2:7635a46e-4cec-4e97-96fc-40824a1ab117',
+        region: CONFIG.COGNITO_REGION,
+        userPoolId: CONFIG.COGNITO_USER_POOL_ID,
+        userPoolWebClientId: CONFIG.COGNITO_CLIENT_ID
     }
 });
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
+        <Router>
+            <Switch>
+                <Route path="/idpresponse" exact component={IDPCallback} />
+                <Route path="/login" exact component={Login} />
+                <Route path="/" exact component={HomeWithAuth} />
+            </Switch>
+        </Router>
     );
   }
 }
 
-export default withAuthenticator(App);
+export default App;
 
