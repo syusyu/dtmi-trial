@@ -2,9 +2,6 @@ import React, { Component } from "react";
 import { CognitoAuth } from "amazon-cognito-auth-js/dist/amazon-cognito-auth";
 import { generateAuth} from "./awsConfig";
 import { Redirect } from "react-router-dom";
-// import dotenv from 'dotenv';
-
-// const env = process.env;
 
 
 class IDPCallback extends Component {
@@ -27,16 +24,17 @@ class IDPCallback extends Component {
     }
 
     render() {
-        if (this.state.needRedirect) {
-            return <Redirect to={this.state.redirectPath} />
-        }
-        return (
-            <div className="IDP">
-                <div className="lander">
-                    <h1>IDP Callback</h1>
-                </div>
+        const temporallyComponent =
+            <div>
+                Redirecting...
             </div>
-        );
+
+        if (this.state.needRedirect) {
+            window.location.assign(CONFIG.APP_ROOT_URL + this.state.redirectPath);
+            return temporallyComponent;
+            // return <Redirect to={this.state.redirectPath} />
+        }
+        return temporallyComponent;
     }
 }
 export default IDPCallback;

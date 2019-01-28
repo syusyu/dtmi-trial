@@ -9,7 +9,6 @@ const WithAuth = withAuthenticator(
     ({ match }) => (
         <Switch>
             <Route path={match.url} exact component={Home} />
-            <Route component={Error} />
         </Switch>
     ),
     false,
