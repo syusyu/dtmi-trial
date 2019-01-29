@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import Amplify, { Auth } from "aws-amplify";
 import { generateAuth} from "./awsConfig";
-
+import LineNotifyToken from "./LineNotifyToken"
+import User from "./User"
 
 const signOut = async () => {
     const auth = generateAuth();
@@ -16,6 +16,8 @@ export default class Home extends Component {
                 <button onClick={signOut}>
                     Sign out
                 </button>
+                <LineNotifyToken setNotifyTokenToUser={e => this.props.setNotifyTokenToUser(e)}/>
+                <User user={this.props.user}/>
             </div>
         );
     }

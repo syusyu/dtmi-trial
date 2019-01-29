@@ -6,11 +6,12 @@ import Home from './Home';
 import { withAuthenticator } from "aws-amplify-react";
 
 const WithAuth = withAuthenticator(
-    ({ match }) => (
-        <Switch>
-            <Route path={match.url} exact component={Home} />
+    (props) => {
+        return <Switch>
+            <Route path={props.match.url} exact render={e => <Home {...props} />} />
         </Switch>
-    ),
+    }
+    ,
     false,
     [<Login />]
 );
