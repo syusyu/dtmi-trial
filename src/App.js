@@ -3,9 +3,10 @@ import {BrowserRouter as Router, Switch, Route, Redirect} from "react-router-dom
 import Login from './Login';
 import HomeWithAuth from './HomeWithAuth';
 import IDPCallback from './IDPCallback';
+import LineNotifyAuth from './LineNotifyAuth';
 import LineNotifyAuthCallback from './LineNotifyAuthCallback';
-import LineNotifyTokenCallback from './LineNotifyTokenCallback';
-import AuthRequired from './AuthRequired';
+import AuthLineRequired from './AuthLineRequired';
+import AuthCognitoRequired from './AuthCognitoRequired';
 import Amplify, { Auth } from "aws-amplify";
 import {createUser, fetchUser, persistUser} from "./userInfo"
 
@@ -26,6 +27,7 @@ class App extends Component {
             authenticated: Boolean(cognitoUser),
             user: this.loadUser(cognitoUser)
         }
+        console.log('APP created...')
     }
 
     loadUser(cognitoUser) {
@@ -61,22 +63,24 @@ class App extends Component {
         })
     }
 
+    hasNotifyToken() {
+        return Boolean(this.state.user) && Boolean(this.state.user.notifyToken)
+    }
+
     render() {
         // console.log(`App.authenticated=${this.state.authenticated}`)
         return (
             <Router>
                 <Switch>
                     <Route path="/idpresponse" exact render={props => <IDPCallback initializeUser={e => this.initializeUser(e)} {...props} />} />
-                    {/*<Route path="/idpresponse" exact component={IDPCallback} />*/}
                     <Route path="/login" exact component={Login}/>
-                    <AuthRequired authenticated={this.state.authenticated}>
-                        {/*<Route path="/" exact component={HomeWithAuth}/>*/}
-                        <Route path="/" exact render={props => <HomeWithAuth user={this.state.user} setNotifyTokenToUser={e => this.setNotifyTokenToUser(e)} {...props} />} />
+                    <AuthCognitoRequired authenticated={this.state.authenticated}>
+                        <Route path="/line-notify-auth" exact component={LineNotifyAuth} />
                         <Route path="/line-auth-response" exact render={props => <LineNotifyAuthCallback setNotifyTokenToUser={e => this.setNotifyTokenToUser(e)} {...props} />} />
-                        {/*<Route path="/line-auth-response" exact component={LineNotifyAuthCallback} />*/}
-                        {/*<Route path="/line-token-response" exact component={LineNotifyTokenCallback} />*/}
-                        {/*<Route path="/line-token-response" exact render={props => <LineNotifyTokenCallback setNotifyTokenToUser={e => this.setNotifyTokenToUser(e)} {...props} />} />*/}
-                    </AuthRequired>
+                        {/*<AuthLineRequired authenticated={this.state.authenticated} hasNotifyToken={() => this.hasNotifyToken()}>*/}
+                            <Route path="/" exact render={props => <HomeWithAuth user={this.state.user}  setNotifyTokenToUser={e => this.setNotifyTokenToUser(e)} {...props} />} />
+                        {/*</AuthLineRequired>*/}
+                    </AuthCognitoRequired>
                 </Switch>
             </Router>
         );
