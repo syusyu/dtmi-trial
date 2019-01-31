@@ -25,9 +25,10 @@ export const createUser = (userId) => {
 }
 
 export const fetchUser = (userId) => {
-    const user = new User(userId);
-    //TODO fetch user from DB
-    return user;
+    return null;
+    // const user = new User(userId);
+    // //TODO fetch user from DB
+    // return user;
 }
 
 export const persistUser = (user) => {
