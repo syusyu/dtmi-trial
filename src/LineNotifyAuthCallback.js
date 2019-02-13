@@ -32,7 +32,7 @@ class LineNotifyAuthCallback extends Component {
                 data: params
             }).then((result) => {
                 console.log(`api.res=${JSON.stringify(result)}`)
-                this.props.setNotifyTokenToUser(result.data.access_token)
+                this.props.setNotifyTokenToUserDB(result.data.access_token)
                 this.invokeRedirect()
             })
         } catch (err) {

@@ -2,6 +2,7 @@ import React, {Component} from "react";
 import {CognitoAuth} from "amazon-cognito-auth-js/dist/amazon-cognito-auth";
 import {generateAuth} from "./awsConfig";
 import { Auth } from "aws-amplify";
+import { Redirect } from 'react-router-dom'
 
 
 class IDPCallback extends Component {
@@ -9,7 +10,8 @@ class IDPCallback extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            needRedirect: false
+            needRedirect: false,
+            path: ''
         }
         this.onSuccessFunc = this.onSuccessFunc.bind(this)
         this.onFailureFunc = this.onFailureFunc.bind(this)
@@ -22,25 +24,31 @@ class IDPCallback extends Component {
 
     onSuccessFunc(result) {
         const userId = Auth.userPool.getCurrentUser().username
-        this.props.initializeUser(userId);
-        this.invokeRedirect()
+        this.props.createUserDB(userId)
+        this.invokeRedirect('/')
     }
 
     onFailureFunc(err) {
         console.error(`IDPCallback failure. err=${JSON.stringify(err)}`)
-        this.invokeRedirect()
+        this.invokeRedirect('/error')
     }
 
-    invokeRedirect() {
-        this.setState({needRedirect: true});
+    invokeRedirect(path) {
+        this.setState({
+            needRedirect: true,
+            path: path
+        });
     }
 
     render() {
         const temporallyComponent = (<div>Redirecting...</div>)
-
         if (this.state.needRedirect) {
-            window.location.assign(CONFIG.APP_ROOT_URL);
-            return temporallyComponent;
+            if (this.state.path == '/') {
+                window.location.assign(CONFIG.APP_ROOT_URL);
+                return temporallyComponent;
+            } else {
+                return <Redirect to={path} />
+            }
         }
         return temporallyComponent;
     }

@@ -16,7 +16,7 @@ export default class Home extends Component {
                 <button onClick={signOut}>
                     Sign out
                 </button>
-                <LineNotifyToken setNotifyTokenToUser={e => this.props.setNotifyTokenToUser(e)}/>
+                <LineNotifyToken setNotifyTokenToUserDB={e => this.props.setNotifyTokenToUserDB(e)}/>
                 <User user={this.props.user}/>
             </div>
         );

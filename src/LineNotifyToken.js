@@ -7,9 +7,9 @@ class LineNotifyToken extends Component {
             token: null
         }
     }
-    callTokenAPI() {
+    async callTokenAPI() {
         this.setState({ token: 'adfaraeripiopoiudxfa;erf' });
-        this.props.setNotifyTokenToUser('xxx')
+        await this.props.setNotifyTokenToUserDB('xxx')
     }
     render() {
         const token = this.state.token

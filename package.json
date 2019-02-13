@@ -30,6 +30,7 @@
     "amazon-cognito-auth-js": "^1.2.4",
     "aws-amplify": "^1.1.19",
     "aws-amplify-react": "^2.3.0",
+    "aws-sdk": "^2.395.0",
     "axios": "^0.18.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
