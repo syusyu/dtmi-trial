@@ -5,7 +5,6 @@ import HomeWithAuth from './HomeWithAuth';
 import IDPCallback from './IDPCallback';
 import LineNotifyAuth from './LineNotifyAuth';
 import LineNotifyAuthCallback from './LineNotifyAuthCallback';
-import AuthLineRequired from './AuthLineRequired';
 import AuthCognitoRequired from './AuthCognitoRequired';
 import Amplify, {Auth} from "aws-amplify";
 import {createUser, fetchUser, updateUserNotifyToken, User} from "./userInfo"
