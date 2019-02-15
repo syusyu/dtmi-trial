@@ -29,3 +29,10 @@ export const generateAuth = (onSuccess, onFailure) => {
     auth.useCodeGrantFlow();
     return auth;
 };
+
+export const awsAppSync =  {
+    "aws_appsync_graphqlEndpoint": "https://gezr5gm6lrf5lgczk2q3v34epu.appsync-api.ap-northeast-1.amazonaws.com/graphql",
+    "aws_appsync_region": "ap-northeast-1",
+    "aws_appsync_authenticationType": "API_KEY",
+    "aws_appsync_apiKey": "da2-4vgw5dnhmrfitjuzcdarp53l6m",
+};

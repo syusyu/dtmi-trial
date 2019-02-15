@@ -1,65 +1,74 @@
 import {dbRequest} from "./dbutil"
+
 const aws = require('aws-sdk');
+import {API, graphqlOperation} from "aws-amplify";
+
 AWS.config.update({
     region: CONFIG.COGNITO_REGION,
     endpoint: "https://localhost:3001"
 });
 
 export class User {
-    constructor(userId) {
+    constructor(userId, notifyToken, searchWords = [], notifyTime = '09:00') {
         this.userId = userId
-        this.notifyToken = null
-        this.searchWords = []
-        this.notifyTime = '09:00'
+        this.notifyToken = notifyToken
+        this.searchWords = searchWords
+        this.notifyTime = notifyTime
     }
+
     setNotifyToken(notifyToken) {
         this.notifyToken = notifyToken
     }
+
     addSearchWords(searchWord) {
         this.searchWords.push(searchWord);
     }
+
     removeSearchWord(searchWord) {
         this.searchWords = this.searchWords.filter(e => e === searchWord)
     }
+
     setNotifyTime(notifyTime) {
         this.notifyTime = notifyTime;
     }
 }
 
-export const createUser = async (user) => {
-    return new User(user.userId)
-    // const db = new aws.DynamoDB.DocumentClient();
-    // return await dbRequest(db.put({
-    //     TableName: 'User',
-    //     Item: user
-    // }))
+const createUserMutation = (userId) =>
+    `mutation {
+           createUser(UserId: "${userId}") {
+             UserId
+           }
+        }`
+export const createUser = async (userId) => {
+    const result = await API.graphql(graphqlOperation(createUserMutation(userId)))
+    const user = result.data.getUser
+    return user != null ? new User(user.UserId) : null
 }
+
+const getUserQuery = (userId) =>
+    `query {
+           getUser(UserId: "${userId}") {
+             UserId NotifyToken
+           }
+        }`
 
 export const fetchUser = async (userId) => {
-    let user = new User(userId)
-    user.setNotifyToken('xxxxx')
-    return user;
-
-    // const db = new aws.DynamoDB.DocumentClient();
-    // return await dbRequest(db.get({
-    //     TableName: 'User',
-    //     Key: {
-    //         userId: userId
-    //     }
-    // }))
+    const result = await API.graphql(graphqlOperation(getUserQuery(userId)))
+    const user = result.data.getUser
+    console.log(`fetchUser.user=${JSON.stringify(user)}`)
+    return user != null ? new User(user.UserId, user.NotifyToken, user.SearchWords, user.NotifyTime) : null
 }
 
+const putUserMutation = (userId, notifyToken) =>
+    `mutation {
+           putUser(UserId: "${userId}", NotifyToken: "${notifyToken}") {
+             UserId NotifyToken
+           }
+        }`
+
 export const updateUser = async (user) => {
-    // const db = new aws.DynamoDB.DocumentClient();
-    // return await dbRequest(db.update({
-    //     TableName: 'User',
-    //     Key: {
-    //         userId: user.userId
-    //     },
-    //     UpdateExpression: "set notifyToken = :n",
-    //     ExpressionAttributeValues:{
-    //         ":n":user.notifyToken
-    //     },
-    //     ReturnValues:"UPDATED_NEW"
-    // }))
+    const result = await API.graphql(graphqlOperation(putUserMutation(userId)))
+    const user = result.data.getUser
+    console.log(`fetchUser.user=${JSON.stringify(user)}`)
+    return user != null ? new User(user.UserId, user.NotifyToken, user.SearchWords, user.NotifyTime) : null
 }

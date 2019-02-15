@@ -9,6 +9,7 @@ import AuthLineRequired from './AuthLineRequired';
 import AuthCognitoRequired from './AuthCognitoRequired';
 import Amplify, {Auth} from "aws-amplify";
 import {createUser, fetchUser, updateUser, User} from "./userInfo"
+import {awsAppSync} from "./awsConfig"
 
 
 Amplify.configure({
@@ -16,7 +17,8 @@ Amplify.configure({
         region: CONFIG.COGNITO_REGION,
         userPoolId: CONFIG.COGNITO_USER_POOL_ID,
         userPoolWebClientId: CONFIG.COGNITO_CLIENT_ID
-    }
+    },
+    ...awsAppSync
 });
 
 class App extends Component {
@@ -88,10 +90,10 @@ class App extends Component {
                         <Route path="/line-notify-auth" exact component={LineNotifyAuth}/>
                         <Route path="/line-auth-response" exact render={props => <LineNotifyAuthCallback
                             setNotifyTokenToUserDB={e => this.setNotifyTokenToUserDB(e)} {...props} />}/>
-                        {/*<AuthLineRequired authenticated={this.state.authenticated} hasNotifyToken={() => this.hasNotifyToken()}>*/}
-                        <Route path="/" exact render={props => <HomeWithAuth user={this.state.user}
-                                                                             setNotifyTokenToUserDB={e => this.setNotifyTokenToUserDB(e)} {...props} />}/>
-                        {/*</AuthLineRequired>*/}
+                        <AuthLineRequired authenticated={this.state.authenticated} hasNotifyToken={() => this.hasNotifyToken()}>
+                            <Route path="/" exact render={props => <HomeWithAuth user={this.state.user}
+                                                                                 setNotifyTokenToUserDB={e => this.setNotifyTokenToUserDB(e)} {...props} />}/>
+                        </AuthLineRequired>
                     </AuthCognitoRequired>
                 </Switch>
             </Router>
