@@ -10,12 +10,12 @@ class LineNotifyAuthCallback extends Component {
         this.state = {
             needRedirect: false
         }
-        console.log(`LineNotifyAuthCallback.props=${JSON.stringify(props)}`)
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         //TODO error handling or retrieve code by more solid way
         const code = this.props.location.search.substr(1).split('&')[0].split('=')[1]
+        console.log(`LineNotifyAuthCallback.componendDidMount.code=${code}`)
 
         let params = new URLSearchParams();
         params.append('grant_type', 'authorization_code');
@@ -23,21 +23,20 @@ class LineNotifyAuthCallback extends Component {
         params.append('redirect_uri', CONFIG.LINE_REDIRECT_AUTH_URI);
         params.append('client_id', CONFIG.LINE_CLIENT_ID);
         params.append('client_secret', CONFIG.LINE_CLIENT_SECRET);
-        //
-        // const headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+
         try {
-            axios({
+            const result = await axios({
                 url: 'https://localhost:3002/line-notify-token',
                 method: 'POST',
                 data: params
-            }).then((result) => {
-                console.log(`api.res=${JSON.stringify(result)}`)
-                this.props.setNotifyTokenToUserDB(result.data.access_token)
-                this.invokeRedirect()
             })
+            console.log(`LineNotifyAuthCallback.api.res=${JSON.stringify(result)}`)
+            const notifyRes = await this.props.setNotifyTokenToUserDB(result.data.access_token)
+            this.invokeRedirect()
         } catch (err) {
             console.error(err)
         }
+
     }
 
     invokeRedirect() {

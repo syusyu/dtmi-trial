@@ -1,6 +1,4 @@
-import {dbRequest} from "./dbutil"
 
-const aws = require('aws-sdk');
 import {API, graphqlOperation} from "aws-amplify";
 
 AWS.config.update({
@@ -66,9 +64,13 @@ const putUserMutation = (userId, notifyToken) =>
            }
         }`
 
-export const updateUser = async (user) => {
-    const result = await API.graphql(graphqlOperation(putUserMutation(userId)))
-    const user = result.data.getUser
-    console.log(`fetchUser.user=${JSON.stringify(user)}`)
-    return user != null ? new User(user.UserId, user.NotifyToken, user.SearchWords, user.NotifyTime) : null
+export const updateUserNotifyToken = async (user, notifyToken) => {
+    console.log(`updateUserNotifyToken.user=${JSON.stringify(user)}, token=${notifyToken}`)
+    const result = await API.graphql(graphqlOperation(putUserMutation(user.userId, notifyToken)))
+    console.log(`updateUserNotifyToken. result=${JSON.stringify(result)}`)
+    if (result.data.putUser == null) {
+        throw Error(`Failed to update notifyToken`)
+    }
+    user.setNotifyToken(notifyToken)
+    return user
 }

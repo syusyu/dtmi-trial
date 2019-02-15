@@ -8,7 +8,7 @@ import LineNotifyAuthCallback from './LineNotifyAuthCallback';
 import AuthLineRequired from './AuthLineRequired';
 import AuthCognitoRequired from './AuthCognitoRequired';
 import Amplify, {Auth} from "aws-amplify";
-import {createUser, fetchUser, updateUser, User} from "./userInfo"
+import {createUser, fetchUser, updateUserNotifyToken, User} from "./userInfo"
 import {awsAppSync} from "./awsConfig"
 
 
@@ -33,21 +33,19 @@ class App extends Component {
         console.log('APP created...')
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         const cognitoUser = this.state.cognitoUser
         if (!cognitoUser) {
             return null;
         }
 
-        fetchUser(cognitoUser.username).then(data => {
-            let memberUser = data;
-            if (memberUser == null) {
-                console.error(`User should be registered username=${cognitoUser.username}`)
-                memberUser = createUser(cognitoUser.username) //Call this method as safety net but actually shouldn't be called.
-            }
-            this.setState({user: memberUser})
-            console.log(`App.componentDidMount.user2=${JSON.stringify(memberUser)}`)
-        })
+        let memberUser = await fetchUser(cognitoUser.username)
+        if (memberUser == null) {
+            console.error(`User should be registered username=${cognitoUser.username}`)
+            memberUser = createUser(cognitoUser.username) //Call this method as safety net but actually shouldn't be called.
+        }
+        this.setState({user: memberUser})
+        console.log(`App.componentDidMount.fetched.user=${JSON.stringify(memberUser)}`)
     }
 
     /**
@@ -65,12 +63,15 @@ class App extends Component {
      */
     async setNotifyTokenToUserDB(notifyToken) {
         console.log(`setNotifyTokenToUser is called. token=${notifyToken}`)
-        const user = this.state.user
-        user.setNotifyToken(notifyToken)
-        await updateUser(user)
+        let user = this.state.user
+        if (!user) {
+            user = await fetchUser(this.state.cognitoUser.username)
+        }
+        user = await updateUserNotifyToken(this.state.user, notifyToken)
         this.setState({
             user: user
         })
+        console.log(`setNotifyTokenToUser is succeeded. user=${JSON.stringify(user)}`)
     }
 
     hasNotifyToken() {
@@ -90,10 +91,8 @@ class App extends Component {
                         <Route path="/line-notify-auth" exact component={LineNotifyAuth}/>
                         <Route path="/line-auth-response" exact render={props => <LineNotifyAuthCallback
                             setNotifyTokenToUserDB={e => this.setNotifyTokenToUserDB(e)} {...props} />}/>
-                        <AuthLineRequired authenticated={this.state.authenticated} hasNotifyToken={() => this.hasNotifyToken()}>
-                            <Route path="/" exact render={props => <HomeWithAuth user={this.state.user}
-                                                                                 setNotifyTokenToUserDB={e => this.setNotifyTokenToUserDB(e)} {...props} />}/>
-                        </AuthLineRequired>
+                        <Route path="/" exact render={props => <HomeWithAuth user={this.state.user}
+                                                                             setNotifyTokenToUserDB={e => this.setNotifyTokenToUserDB(e)} {...props} />}/>
                     </AuthCognitoRequired>
                 </Switch>
             </Router>

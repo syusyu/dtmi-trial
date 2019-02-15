@@ -21,7 +21,7 @@ class LineNotifyToken extends Component {
             <div>
                 {token ? token : <button onClick={(e) => this.callTokenAPI(e)}>Get token (dummy)</button>}
                 <br />
-                <a href={url}>Login with LINE</a>
+                <a href={url}>Get token of LINE Notify</a>
                 <br />
             </div>
         );
