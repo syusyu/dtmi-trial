@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { generateAuth} from "./awsConfig";
-import LineNotifyToken from "./LineNotifyToken"
 import User from "./User"
 
 const signOut = async () => {
