@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@material-ui/core": "^3.9.2",
+    "@material-ui/icons": "^3.0.2",
     "amazon-cognito-auth-js": "^1.2.4",
     "aws-amplify": "^1.1.19",
     "aws-amplify-react": "^2.3.0",
