@@ -1,27 +1,11 @@
 import {API, graphqlOperation} from "aws-amplify";
 
 export class User {
-    constructor(userId, notifyToken, searchWords = [], notifyTime = '09:00') {
+    constructor(userId, notifyToken, notifyTime = '09:00', searchWords = []) {
         this.userId = userId
         this.notifyToken = notifyToken
-        this.searchWords = searchWords
         this.notifyTime = notifyTime
-    }
-
-    setNotifyToken(notifyToken) {
-        this.notifyToken = notifyToken
-    }
-
-    addSearchWords(searchWord) {
-        this.searchWords.push(searchWord);
-    }
-
-    removeSearchWord(searchWord) {
-        this.searchWords = this.searchWords.filter(e => e === searchWord)
-    }
-
-    setNotifyTime(notifyTime) {
-        this.notifyTime = notifyTime;
+        this.searchWords = searchWords
     }
 }
 
@@ -36,10 +20,10 @@ const getUserFromStorage = () => JSON.parse(sessionStorage.getItem(STORAGE_KEY_U
 const createUserMutation = (userId) =>
     `mutation {
            createUser(UserId: "${userId}") {
-             UserId
+             UserId NotifyToken NotifyTime SearchWords
            }
         }`
-export const createUser = async (userId) => {
+export const createUserDB = async (userId) => {
     const apiResult = await API.graphql(graphqlOperation(createUserMutation(userId)))
     console.log(`userInfo.createUser. apiResult=${JSON.stringify(apiResult)}`)
     const user = apiResult.data.getUser ? new User(user.UserId) : null
@@ -50,11 +34,11 @@ export const createUser = async (userId) => {
 const getUserQuery = (userId) =>
     `query {
            getUser(UserId: "${userId}") {
-             UserId NotifyToken
+             UserId NotifyToken NotifyTime SearchWords
            }
         }`
 
-export const fetchUser = async (userId) => {
+export const fetchUserDB = async (userId) => {
     const cache = getUserFromStorage()
     if (cache) {
         return cache
@@ -63,25 +47,44 @@ export const fetchUser = async (userId) => {
     const apiResult = await API.graphql(graphqlOperation(getUserQuery(userId)))
     console.log(`userInfo.fetchUser.apiResult=${JSON.stringify(apiResult)}`)
     const dbUser = apiResult.data.getUser
-    const user = dbUser != null ? new User(dbUser.UserId, dbUser.NotifyToken, dbUser.SearchWords, dbUser.NotifyTime) : null
+    const user = dbUser != null ? new User(dbUser.UserId, dbUser.NotifyToken, dbUser.NotifyTime, dbUser.SearchWords) : null
     updateUserToStorage(user)
     return user
 }
 
-const putUserMutation = (userId, notifyToken) =>
+const putUserNotifyTokenMutation = (userId, notifyToken) =>
     `mutation {
            putUser(UserId: "${userId}", NotifyToken: "${notifyToken}") {
-             UserId NotifyToken
+             UserId NotifyToken NotifyTime SearchWords
            }
         }`
 
-export const updateUserNotifyToken = async (user, notifyToken) => {
-    const apiResult = await API.graphql(graphqlOperation(putUserMutation(user.userId, notifyToken)))
-    console.log(`userInfo.updateUserNotifyToken. apiResult=${JSON.stringify(apiResult)}`)
+export const updateUserNotifyTokenDB = async (user, notifyToken) => {
+    const apiResult = await API.graphql(graphqlOperation(putUserNotifyTokenMutation(user.userId, notifyToken)))
+    console.log(`userInfo.updateUserNotifyToken.apiResult=${JSON.stringify(apiResult)}`)
     if (apiResult.data.putUser == null) {
         throw Error(`Failed to update notifyToken`)
     }
-    user.setNotifyToken(notifyToken)
+    console.log(`updateUserNotifyTokenDB.user=${JSON.stringify(user)}`)
+    user.notifyToken = notifyToken
+    updateUserToStorage(user)
+    return user
+}
+
+const putUserSearchWordsMutation = (userId, searchWords) =>
+    `mutation {
+           putUser(UserId: "${userId}", SearchWords: "${searchWords}") {
+             UserId NotifyToken NotifyTime SearchWords
+           }
+        }`
+
+export const updateUserSearchWordsDB = async (user, searchWords) => {
+    const apiResult = await API.graphql(graphqlOperation(putUserSearchWordsMutation(user.userId, searchWords)))
+    console.log(`userInfo.putUserSearchWordsMutation.apiResult=${JSON.stringify(apiResult)}`)
+    if (apiResult.data.putUser == null) {
+        throw Error(`Failed to update notifyToken`)
+    }
+    user.searchWords = searchWords
     updateUserToStorage(user)
     return user
 }

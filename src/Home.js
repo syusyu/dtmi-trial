@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { generateAuth} from "./awsConfig";
 import User from "./User"
-import Program from "./Program"
 
 const signOut = async () => {
     const auth = generateAuth();
@@ -9,6 +8,10 @@ const signOut = async () => {
 }
 
 export default class Home extends Component {
+    constructor(props) {
+        super(props)
+        console.log(`HOME.user=${JSON.stringify(props.user)}`)
+    }
     render() {
         return (
             <div>
@@ -16,8 +19,7 @@ export default class Home extends Component {
                 <button onClick={signOut}>
                     Sign out
                 </button>
-                <User user={this.props.user}/>
-                <Program user={this.props.user}/>
+                <User {...this.props}/>
             </div>
         );
     }

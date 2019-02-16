@@ -24,7 +24,7 @@ class IDPCallback extends Component {
 
     onSuccessFunc(result) {
         const userId = Auth.userPool.getCurrentUser().username
-        this.props.createUserDB(userId)
+        this.props.createUser(userId)
         this.invokeRedirect('/')
     }
 

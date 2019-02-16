@@ -7,7 +7,7 @@ import LineNotifyAuth from './LineNotifyAuth';
 import LineNotifyAuthCallback from './LineNotifyAuthCallback';
 import AuthCognitoRequired from './AuthCognitoRequired';
 import Amplify, {Auth} from "aws-amplify";
-import {createUser, fetchUser, updateUserNotifyToken, User} from "./userInfo"
+import {createUserDB, fetchUserDB, updateUserNotifyTokenDB, updateUserSearchWordsDB, User} from "./userInfo"
 import {awsAppSync} from "./awsConfig"
 
 
@@ -38,10 +38,10 @@ class App extends Component {
             return null;
         }
 
-        let memberUser = await fetchUser(cognitoUser.username)
+        let memberUser = await fetchUserDB(cognitoUser.username)
         if (memberUser == null) {
             console.error(`User should be registered username=${cognitoUser.username}`)
-            memberUser = createUser(cognitoUser.username) //Call this method as safety net but actually shouldn't be called.
+            memberUser = createUserDB(cognitoUser.username) //Call this method as safety net but actually shouldn't be called.
         }
         this.setState({user: memberUser})
         console.log(`App.componentDidMount.fetched.user=${JSON.stringify(memberUser)}`)
@@ -50,31 +50,41 @@ class App extends Component {
     /**
      * This is called by callback function of cognito oauth
      */
-    async createUserDB(userId, onSuccess, onError) {
+    async createUser(userId, onSuccess, onError) {
         console.log(`createUserDB is called. userId=${userId}`)
         const user = new User(userId)
-        await createUser(user)
+        await createUserDB(user)
         this.setState({user: user})
     }
 
     /**
      * This is called by callback function of LINE oauth
      */
-    async setNotifyTokenToUserDB(notifyToken) {
-        console.log(`setNotifyTokenToUser is called. token=${notifyToken}`)
+    async updateNotifyToken(notifyToken) {
+        console.log(`updateNotifyToken is called. token=${notifyToken}`)
         let user = this.state.user
         if (!user) {
-            user = await fetchUser(this.state.cognitoUser.username)
+            user = await fetchUserDB(this.state.cognitoUser.username)
         }
-        user = await updateUserNotifyToken(this.state.user, notifyToken)
+        user = await updateUserNotifyTokenDB(this.state.user, notifyToken)
         this.setState({
             user: user
         })
-        console.log(`setNotifyTokenToUser is succeeded. user=${JSON.stringify(user)}`)
+        console.log(`updateNotifyToken is succeeded. user=${JSON.stringify(user)}`)
     }
 
     hasNotifyToken() {
         return Boolean(this.state.user) && Boolean(this.state.user.notifyToken)
+    }
+
+    async updateSearchWords(searchWords) {
+        console.log(`updateSearchWords is called. searchWords=${searchWords}`)
+        let user = this.state.user
+        user = await updateUserSearchWordsDB(this.state.user, searchWords)
+        this.setState({
+            user: user
+        })
+        console.log(`updateSearchWords is succeeded. user=${JSON.stringify(user)}`)
     }
 
     render() {
@@ -83,15 +93,15 @@ class App extends Component {
             <Router>
                 <Switch>
                     <Route path="/idpresponse" exact
-                           render={props => <IDPCallback createUserDB={e => this.createUserDB(e)} {...props} />}/>
+                           render={props => <IDPCallback createUser={e => this.createUser(e)} {...props} />}/>
                     <Route path="/login" exact component={Login}/>
                     <Route path="/error" exact component={Error}/>
                     <AuthCognitoRequired authenticated={this.state.authenticated}>
                         <Route path="/line-notify-auth" exact component={LineNotifyAuth}/>
                         <Route path="/line-auth-response" exact render={props => <LineNotifyAuthCallback
-                            setNotifyTokenToUserDB={e => this.setNotifyTokenToUserDB(e)} {...props} />}/>
+                            updateNotifyToken={e => this.updateNotifyToken(e)} {...props} />}/>
                         <Route path="/" exact render={props => <HomeWithAuth user={this.state.user}
-                                                                             setNotifyTokenToUserDB={e => this.setNotifyTokenToUserDB(e)} {...props} />}/>
+                            updateSearchWords={e => this.updateSearchWords(e)} {...props} />}/>
                     </AuthCognitoRequired>
                 </Switch>
             </Router>

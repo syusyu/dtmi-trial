@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Program from "./Program"
 
 export default class User extends Component {
     render() {
@@ -10,7 +11,11 @@ export default class User extends Component {
         const state = 'xxxxxxxxxxxxx';
         const url = `https://notify-bot.line.me/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUrl}&scope=notify&state=${state}`;
 
-        const notifyToken = hasNotifyToken ? <p>lineNotifyToken: {this.props.user.notifyToken}</p> :
+        const notifyToken = hasNotifyToken ?
+            <div>
+                <p>lineNotifyToken: {this.props.user.notifyToken}</p>
+                <Program {...this.props} />
+            </div> :
             <a href={url}>Get token of LINE Notify</a>
 
         return userLoaded ?
