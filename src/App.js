@@ -7,7 +7,7 @@ import LineNotifyAuth from './LineNotifyAuth';
 import LineNotifyAuthCallback from './LineNotifyAuthCallback';
 import AuthCognitoRequired from './AuthCognitoRequired';
 import Amplify, {Auth} from "aws-amplify";
-import {createUserDB, fetchUserDB, updateUserNotifyTokenDB, updateUserSearchWordsDB, User} from "./userInfo"
+import {createUserDB, fetchUserDB, updateUserNotifyTokenDB, updateUserSearchWordsDB, User, deleteUserFromStorage} from "./userInfo"
 import {awsAppSync} from "./awsConfig"
 
 
@@ -35,13 +35,14 @@ class App extends Component {
     async componentDidMount() {
         const cognitoUser = this.state.cognitoUser
         if (!cognitoUser) {
+            deleteUserFromStorage()
             return null;
         }
 
         let memberUser = await fetchUserDB(cognitoUser.username)
         if (memberUser == null) {
             console.error(`User should be registered username=${cognitoUser.username}`)
-            memberUser = createUserDB(cognitoUser.username) //Call this method as safety net but actually shouldn't be called.
+            memberUser = await createUserDB(cognitoUser.username) //Call this method as safety net but actually shouldn't be called.
         }
         this.setState({user: memberUser})
         console.log(`App.componentDidMount.fetched.user=${JSON.stringify(memberUser)}`)
@@ -61,7 +62,6 @@ class App extends Component {
      * This is called by callback function of LINE oauth
      */
     async updateNotifyToken(notifyToken) {
-        console.log(`updateNotifyToken is called. token=${notifyToken}`)
         let user = this.state.user
         if (!user) {
             user = await fetchUserDB(this.state.cognitoUser.username)
@@ -78,7 +78,6 @@ class App extends Component {
     }
 
     async updateSearchWords(searchWords) {
-        console.log(`updateSearchWords is called. searchWords=${searchWords}`)
         let user = this.state.user
         user = await updateUserSearchWordsDB(this.state.user, searchWords)
         this.setState({
