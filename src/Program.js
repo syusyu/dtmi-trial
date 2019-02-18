@@ -76,7 +76,7 @@ const styles = {
 class Program extends Component {
     constructor(props) {
         super(props);
-        console.log(`Program.searchWords=${this.props.user.searchWords}`)
+        console.log(`Program.searchWords=${JSON.stringify(this.props.user.searchWords)}`)
         this.state = {
             searchWords: this.props.user.searchWords || [],
             open: false,
@@ -95,7 +95,6 @@ class Program extends Component {
         });
     }
     closeDialog(word) {
-        console.log(`closeDialog.word=${word}`)
         if (word) {
             this.addSearchWord(word)
         }
@@ -105,6 +104,7 @@ class Program extends Component {
     }
     async addSearchWord(word) {
         this.state.searchWords.push(word)
+        console.log(`Program.addSearchWord.searchWords=${JSON.stringify(this.state.searchWords)}`)
         await this.props.updateSearchWords(this.state.searchWords)
     }
     render() {

@@ -74,7 +74,7 @@ export const updateUserNotifyTokenDB = async (user, notifyToken) => {
 
 const updateUserSearchWordsMutation = (userId, searchWords) =>
     `mutation {
-           updateUserSearchWords(UserId: "${userId}", SearchWords: "${searchWords}") {
+           updateUserSearchWords(UserId: "${userId}", SearchWords: ${JSON.stringify(searchWords)}) {
              UserId NotifyToken NotifyTime SearchWords
            }
         }`
