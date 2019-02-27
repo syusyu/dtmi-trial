@@ -8,14 +8,15 @@ import LineNotifyAuthCallback from './LineNotifyAuthCallback';
 import AuthCognitoRequired from './AuthCognitoRequired';
 import Amplify, {Auth} from "aws-amplify";
 import {createUserDB, fetchUserDB, updateUserNotifyTokenDB, updateUserSearchWordsDB, User, deleteUserFromStorage} from "./userInfo"
-import {awsAppSync} from "./awsConfig"
+import {awsAppSync, generateAuth, establishAuthSession} from "./awsConfig"
 
 
 Amplify.configure({
     Auth: {
         region: CONFIG.COGNITO_REGION,
         userPoolId: CONFIG.COGNITO_USER_POOL_ID,
-        userPoolWebClientId: CONFIG.COGNITO_CLIENT_ID
+        userPoolWebClientId: CONFIG.COGNITO_CLIENT_ID,
+        identityPoolId: CONFIG.COGNITO_IDENTITY_POOL_ID,
     },
     ...awsAppSync
 });
@@ -24,6 +25,7 @@ class App extends Component {
     constructor(props) {
         super(props);
         const cognitoUser = Auth.userPool ? Auth.userPool.getCurrentUser() : null;
+        // console.log(`App.constructor=cognitoUser=${JSON.stringify(cognitoUser)}, auth=${Boolean(cognitoUser)}`)
         this.state = {
             cognitoUser: cognitoUser,
             authenticated: Boolean(cognitoUser),
@@ -34,18 +36,13 @@ class App extends Component {
 
     async componentDidMount() {
         const cognitoUser = this.state.cognitoUser
-        if (!cognitoUser) {
-            deleteUserFromStorage()
-            return null;
+        if (cognitoUser) {
+            establishAuthSession(cognitoUser)
+            const memberUser = await fetchUserDB(cognitoUser.username)
+            this.setState({user: memberUser})
         }
 
-        let memberUser = await fetchUserDB(cognitoUser.username)
-        if (memberUser == null) {
-            console.error(`User should be registered username=${cognitoUser.username}`)
-            memberUser = await createUserDB(cognitoUser.username) //Call this method as safety net but actually shouldn't be called.
-        }
-        this.setState({user: memberUser})
-        console.log(`App.componentDidMount.fetched.user=${JSON.stringify(memberUser)}`)
+        console.log(`App.componentDidMount.fetched.user=${JSON.stringify(this.state.user)}`)
     }
 
     /**
@@ -54,6 +51,8 @@ class App extends Component {
     async createUser(userId, onSuccess, onError) {
         console.log(`createUserDB is called. userId=${userId}`)
         const user = new User(userId)
+        const id = await Auth.currentCredentials()
+        console.log(`FID======${JSON.stringify(id.params.IdentityId)}`)
         await createUserDB(user)
         this.setState({user: user})
     }
@@ -99,7 +98,7 @@ class App extends Component {
                         <Route path="/line-notify-auth" exact component={LineNotifyAuth}/>
                         <Route path="/line-auth-response" exact render={props => <LineNotifyAuthCallback
                             updateNotifyToken={e => this.updateNotifyToken(e)} {...props} />}/>
-                        <Route path="/" exact render={props => <HomeWithAuth user={this.state.user}
+                        <Route path="/" exact render={props => <HomeWithAuth user={this.state.user} cognitoUser={this.state.cognitoUser}
                             updateSearchWords={e => this.updateSearchWords(e)} {...props} />}/>
                     </AuthCognitoRequired>
                 </Switch>

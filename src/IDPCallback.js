@@ -23,9 +23,10 @@ class IDPCallback extends Component {
     }
 
     onSuccessFunc(result) {
-        const userId = Auth.userPool.getCurrentUser().username
-        this.props.createUser(userId)
-        this.invokeRedirect('/')
+        console.log(`onSuccess.result=${JSON.stringify(result)}`)
+        // const userId = Auth.userPool.getCurrentUser().username
+        // this.props.createUser(userId)
+        // this.invokeRedirect('/')
     }
 
     onFailureFunc(err) {
@@ -47,7 +48,7 @@ class IDPCallback extends Component {
                 window.location.assign(CONFIG.APP_ROOT_URL);
                 return temporallyComponent;
             } else {
-                return <Redirect to={path} />
+                return <Redirect to={this.state.path} />
             }
         }
         return temporallyComponent;

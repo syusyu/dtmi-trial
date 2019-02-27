@@ -9,13 +9,12 @@ export class User {
     }
 }
 
-const STORAGE_KEY_USER = 'SKU'
-
-const updateUserToStorage = (user) => {
-    sessionStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user))
-}
-const getUserFromStorage = () => JSON.parse(sessionStorage.getItem(STORAGE_KEY_USER))
-export const deleteUserFromStorage = () => sessionStorage.removeItem(STORAGE_KEY_USER)
+// const STORAGE_KEY_USER = 'SKU'
+// const updateUserToStorage = (user) => {
+//     sessionStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user))
+// }
+// const getUserFromStorage = () => JSON.parse(sessionStorage.getItem(STORAGE_KEY_USER))
+// export const deleteUserFromStorage = () => sessionStorage.removeItem(STORAGE_KEY_USER)
 
 const createUserMutation = (userId) =>
     `mutation {
@@ -28,7 +27,6 @@ export const createUserDB = async (userId) => {
     console.log(`userInfo.createUserDB.apiResult=${JSON.stringify(apiResult)}`)
     const dbUser = apiResult.data.createUser
     const user = dbUser ? new User(dbUser.UserId) : null
-    updateUserToStorage(user)
     return user
 }
 
@@ -40,16 +38,11 @@ const getUserQuery = (userId) =>
         }`
 
 export const fetchUserDB = async (userId) => {
-    const cache = getUserFromStorage()
-    if (cache) {
-        return cache
-    }
-
+    console.log(`userInfo.fetchUser.userId=${userId}`)
     const apiResult = await API.graphql(graphqlOperation(getUserQuery(userId)))
     console.log(`userInfo.fetchUser.apiResult=${JSON.stringify(apiResult)}`)
     const dbUser = apiResult.data.getUser
     const user = dbUser != null ? new User(dbUser.UserId, dbUser.NotifyToken, dbUser.NotifyTime, dbUser.SearchWords) : null
-    updateUserToStorage(user)
     return user
 }
 
@@ -68,7 +61,6 @@ export const updateUserNotifyTokenDB = async (user, notifyToken) => {
     }
     console.log(`updateUserNotifyTokenDB.user=${JSON.stringify(user)}`)
     user.notifyToken = notifyToken
-    updateUserToStorage(user)
     return user
 }
 
@@ -86,6 +78,5 @@ export const updateUserSearchWordsDB = async (user, searchWords) => {
         throw Error(`Failed to update notifyToken`)
     }
     user.searchWords = searchWords
-    updateUserToStorage(user)
     return user
 }
