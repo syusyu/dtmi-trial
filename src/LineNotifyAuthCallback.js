@@ -44,7 +44,6 @@ class LineNotifyAuthCallback extends Component {
     }
 
     render() {
-        // return (<div>TEmporarrly stopping</div>)
         return this.state.needRedirect ? <Redirect to={"/"}/> : <div>Redirecting(LINE token)...</div>
     }
 }

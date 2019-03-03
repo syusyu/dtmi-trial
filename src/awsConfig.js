@@ -17,8 +17,6 @@ export const generateAuth = (onSuccess, onFailure) => {
 
     const auth = new CognitoAuth(cognitoConfig);
 
-    console.log(`generateAuth.auth=${JSON.stringify(auth)}`)
-
     auth.userhandler = {
         onSuccess: function(result) {
             const loginKey = `cognito-idp.${CONFIG.COGNITO_REGION}.amazonaws.com/${CONFIG.COGNITO_USER_POOL_ID}`
@@ -51,7 +49,6 @@ export const generateAuth = (onSuccess, onFailure) => {
 };
 
 export const establishAuthSession = (cognitoUser) => {
-    // console.log(`establish.cognitoUser=${cognitoUser.username}`)
     cognitoUser.getSession(function(err, session) {
         if (err) {
             alert(err.message || JSON.stringify(err));
@@ -64,8 +61,5 @@ export const establishAuthSession = (cognitoUser) => {
 export const awsAppSync =  {
     "aws_appsync_graphqlEndpoint": "https://gezr5gm6lrf5lgczk2q3v34epu.appsync-api.ap-northeast-1.amazonaws.com/graphql",
     "aws_appsync_region": "ap-northeast-1",
-    // "aws_appsync_authenticationType": "AMAZON_COGNITO_USER_POOLS",
-    // "aws_appsync_apiKey": "",
     "aws_appsync_authenticationType": "AWS_IAM",
-    // "aws_appsync_apiKey": "",
 };

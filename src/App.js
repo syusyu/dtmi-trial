@@ -26,35 +26,30 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            cognitoUser: Auth.userPool ? Auth.userPool.getCurrentUser() : null,
             authenticated: Auth.userPool && Auth.userPool.getCurrentUser(),
             user: null
         }
     }
 
     async componentDidMount() {
-        const cognitoUser = Auth.userPool ? Auth.userPool.getCurrentUser() : null;
-        console.log(`App.componentDidMount=cognitoUser=${Boolean(cognitoUser)}, auth=${Boolean(cognitoUser)}`)
-
-        if (cognitoUser) {
-            // establishAuthSession(cognitoUser)
-            const memberUser = await fetchUserDB(cognitoUser.username)
+        if (this.state.cognitoUser) {
+            const memberUser = await fetchUserDB(this.state.cognitoUser.username)
             this.setState({user: memberUser})
         }
-
         console.log(`App.componentDidMount.fetched.user=${JSON.stringify(this.state.user)}`)
     }
 
     hasNotifyToken() {
-        return Boolean(this.state.user) && Boolean(this.state.user.notifyToken)
+        return Boolean(this.state.user && this.state.user.notifyToken)
     }
 
     /**
      * This is called by callback function of LINE oauth
      */
     async updateNotifyToken(notifyToken) {
-        const cognitoUser = Auth.userPool.getCurrentUser()
-        let user = await fetchUserDB(cognitoUser.username)
-        user = await updateUserNotifyTokenDB(this.state.user, notifyToken)
+        let user = await fetchUserDB(this.state.cognitoUser.username)
+        user = await updateUserNotifyTokenDB(user, notifyToken)
         this.setState({
             user: user
         })
@@ -62,7 +57,6 @@ class App extends Component {
     }
 
     async updateSearchWords(searchWords) {
-        // let user = this.state.user
         const user = await updateUserSearchWordsDB(this.state.user, searchWords)
         this.setState({
             user: user
@@ -70,8 +64,16 @@ class App extends Component {
         console.log(`updateSearchWords is succeeded. user=${JSON.stringify(user)}`)
     }
 
+    signOut() {
+        this.state.cognitoUser.signOut()
+        this.setState({
+            cognitoUser:null,
+            user:null,
+            authenticated: false
+        })
+    }
+
     render() {
-        // console.log(`App.authenticated=${this.state.authenticated}`)
         return (
             <Router>
                 <Switch>
@@ -84,7 +86,7 @@ class App extends Component {
                         <Route path="/line-auth-response" exact render={props => <LineNotifyAuthCallback
                             updateNotifyToken={e => this.updateNotifyToken(e)} {...props} />}/>
                         <Route path="/" exact render={props => <HomeWithAuth user={this.state.user}
-                            updateSearchWords={e => this.updateSearchWords(e)} {...props} />}/>
+                            updateSearchWords={e => this.updateSearchWords(e)} signOut={() => this.signOut()} {...props} />}/>
                     </AuthCognitoRequired>
                 </Switch>
             </Router>
