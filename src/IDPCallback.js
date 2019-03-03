@@ -18,15 +18,14 @@ class IDPCallback extends Component {
     }
 
     componentDidMount() {
+        console.log(`IDPCallback.componentDidMount`)
         const auth = generateAuth(this.onSuccessFunc, this.onFailureFunc);
         auth.parseCognitoWebResponse(this.props.location.search);
     }
 
     onSuccessFunc(result) {
         console.log(`onSuccess.result=${JSON.stringify(result)}`)
-        // const userId = Auth.userPool.getCurrentUser().username
-        // this.props.createUser(userId)
-        // this.invokeRedirect('/')
+        this.invokeRedirect('/')
     }
 
     onFailureFunc(err) {

@@ -17,24 +17,20 @@ export const generateAuth = (onSuccess, onFailure) => {
 
     const auth = new CognitoAuth(cognitoConfig);
 
+    console.log(`generateAuth.auth=${JSON.stringify(auth)}`)
+
     auth.userhandler = {
         onSuccess: function(result) {
             const loginKey = `cognito-idp.${CONFIG.COGNITO_REGION}.amazonaws.com/${CONFIG.COGNITO_USER_POOL_ID}`
             console.log(`auth.userhandler.loginKey=${loginKey}`)
             const loginProvider = {};
             loginProvider[loginKey] = result.getIdToken().getJwtToken();
-            console.log(`auth.userhandler.token=${result.getIdToken().getJwtToken()}`)
 
             AWS.config.region = CONFIG.COGNITO_REGION
             AWS.config.credentials = new AWS.CognitoIdentityCredentials({
                 IdentityPoolId: CONFIG.COGNITO_IDENTITY_POOL_ID,
                 Logins: loginProvider
             });
-            // AWS.config.region = 'ap-northeast-1'
-            // AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-            //     IdentityPoolId: 'ap-northeast-1:a9fd0770-6654-4798-bf1c-78c106c635bb',
-            //     Logins: loginProvider
-            // });
             AWS.config.credentials.refresh((error) => {
                 if (error) {
                     console.error(error);
@@ -62,19 +58,6 @@ export const establishAuthSession = (cognitoUser) => {
             return;
         }
         console.log('session validity: ' + session.isValid());
-
-        const loginKey = `cognito-idp.${CONFIG.COGNITO_REGION}.amazonaws.com/${CONFIG.COGNITO_USER_POOL_ID}`
-        const loginProvider = {};
-        loginProvider[loginKey] = session.getIdToken().getJwtToken();
-
-        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-            IdentityPoolId: CONFIG.COGNITO_IDENTITY_POOL_ID,
-            Logins: loginProvider
-        });
-
-        // Instantiate aws sdk service objects now that the credentials have been updated.
-        // example: var s3 = new AWS.S3();
-
     });
 }
 

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {BrowserRouter as Router, Switch, Route, Redirect} from "react-router-dom";
 import Login from './Login';
+import Error from './Error'
 import HomeWithAuth from './HomeWithAuth';
 import IDPCallback from './IDPCallback';
 import LineNotifyAuth from './LineNotifyAuth';
@@ -24,20 +25,18 @@ Amplify.configure({
 class App extends Component {
     constructor(props) {
         super(props);
-        const cognitoUser = Auth.userPool ? Auth.userPool.getCurrentUser() : null;
-        // console.log(`App.constructor=cognitoUser=${JSON.stringify(cognitoUser)}, auth=${Boolean(cognitoUser)}`)
         this.state = {
-            cognitoUser: cognitoUser,
-            authenticated: Boolean(cognitoUser),
+            authenticated: Auth.userPool && Auth.userPool.getCurrentUser(),
             user: null
         }
-        console.log('APP created...')
     }
 
     async componentDidMount() {
-        const cognitoUser = this.state.cognitoUser
+        const cognitoUser = Auth.userPool ? Auth.userPool.getCurrentUser() : null;
+        console.log(`App.componentDidMount=cognitoUser=${Boolean(cognitoUser)}, auth=${Boolean(cognitoUser)}`)
+
         if (cognitoUser) {
-            establishAuthSession(cognitoUser)
+            // establishAuthSession(cognitoUser)
             const memberUser = await fetchUserDB(cognitoUser.username)
             this.setState({user: memberUser})
         }
@@ -45,26 +44,16 @@ class App extends Component {
         console.log(`App.componentDidMount.fetched.user=${JSON.stringify(this.state.user)}`)
     }
 
-    /**
-     * This is called by callback function of cognito oauth
-     */
-    async createUser(userId, onSuccess, onError) {
-        console.log(`createUserDB is called. userId=${userId}`)
-        const user = new User(userId)
-        const id = await Auth.currentCredentials()
-        console.log(`FID======${JSON.stringify(id.params.IdentityId)}`)
-        await createUserDB(user)
-        this.setState({user: user})
+    hasNotifyToken() {
+        return Boolean(this.state.user) && Boolean(this.state.user.notifyToken)
     }
 
     /**
      * This is called by callback function of LINE oauth
      */
     async updateNotifyToken(notifyToken) {
-        let user = this.state.user
-        if (!user) {
-            user = await fetchUserDB(this.state.cognitoUser.username)
-        }
+        const cognitoUser = Auth.userPool.getCurrentUser()
+        let user = await fetchUserDB(cognitoUser.username)
         user = await updateUserNotifyTokenDB(this.state.user, notifyToken)
         this.setState({
             user: user
@@ -72,13 +61,9 @@ class App extends Component {
         console.log(`updateNotifyToken is succeeded. user=${JSON.stringify(user)}`)
     }
 
-    hasNotifyToken() {
-        return Boolean(this.state.user) && Boolean(this.state.user.notifyToken)
-    }
-
     async updateSearchWords(searchWords) {
-        let user = this.state.user
-        user = await updateUserSearchWordsDB(this.state.user, searchWords)
+        // let user = this.state.user
+        const user = await updateUserSearchWordsDB(this.state.user, searchWords)
         this.setState({
             user: user
         })
@@ -98,7 +83,7 @@ class App extends Component {
                         <Route path="/line-notify-auth" exact component={LineNotifyAuth}/>
                         <Route path="/line-auth-response" exact render={props => <LineNotifyAuthCallback
                             updateNotifyToken={e => this.updateNotifyToken(e)} {...props} />}/>
-                        <Route path="/" exact render={props => <HomeWithAuth user={this.state.user} cognitoUser={this.state.cognitoUser}
+                        <Route path="/" exact render={props => <HomeWithAuth user={this.state.user}
                             updateSearchWords={e => this.updateSearchWords(e)} {...props} />}/>
                     </AuthCognitoRequired>
                 </Switch>

@@ -38,7 +38,6 @@ const getUserQuery = (userId) =>
         }`
 
 export const fetchUserDB = async (userId) => {
-    console.log(`userInfo.fetchUser.userId=${userId}`)
     const apiResult = await API.graphql(graphqlOperation(getUserQuery(userId)))
     console.log(`userInfo.fetchUser.apiResult=${JSON.stringify(apiResult)}`)
     const dbUser = apiResult.data.getUser
@@ -59,7 +58,6 @@ export const updateUserNotifyTokenDB = async (user, notifyToken) => {
     if (apiResult.data.updateUserNotify == null) {
         throw Error(`Failed to update notifyToken`)
     }
-    console.log(`updateUserNotifyTokenDB.user=${JSON.stringify(user)}`)
     user.notifyToken = notifyToken
     return user
 }

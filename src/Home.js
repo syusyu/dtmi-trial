@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 import { generateAuth} from "./awsConfig";
 import User from "./User"
+import Amplify, {Auth} from "aws-amplify";
+
 
 
 export default class Home extends Component {
     signOut() {
         // const auth = generateAuth();
         // await auth.signOut();
-        this.props.cognitoUser.signOut();
+        Auth.getCurrentUser().signOut();
         console.log('SIGN-OUT!!!')
     }
 
@@ -20,9 +22,11 @@ export default class Home extends Component {
         return (
             <div>
                 <p>This is Home</p>
+
                 <button onClick={() => this.signOut()}>
                     Sign out
                 </button>
+
                 <User {...this.props}/>
             </div>
         );
