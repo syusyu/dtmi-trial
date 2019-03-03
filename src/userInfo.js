@@ -1,11 +1,12 @@
 import {API, graphqlOperation} from "aws-amplify";
 
 export class User {
-    constructor(userId, notifyToken, notifyTime = '09:00', searchWords = []) {
+    constructor(userId, notifyToken, notifyTime = '09:00', searchWords = [], programs = []) {
         this.userId = userId
         this.notifyToken = notifyToken
         this.notifyTime = notifyTime
         this.searchWords = searchWords
+        this.programs = programs
     }
 }
 
@@ -20,6 +21,7 @@ const createUserMutation = (userId) =>
     `mutation {
            createUser(UserId: "${userId}") {
              UserId NotifyToken NotifyTime SearchWords
+             Programs{SearchWord Programs{Title Station ProgramId Notify Link Date}}
            }
         }`
 export const createUserDB = async (userId) => {
@@ -34,6 +36,7 @@ const getUserQuery = (userId) =>
     `query {
            getUser(UserId: "${userId}") {
              UserId NotifyToken NotifyTime SearchWords
+             Programs{SearchWord Programs{Title Station ProgramId Notify Link Date}}
            }
         }`
 
@@ -41,7 +44,7 @@ export const fetchUserDB = async (userId) => {
     const apiResult = await API.graphql(graphqlOperation(getUserQuery(userId)))
     console.log(`userInfo.fetchUser.apiResult=${JSON.stringify(apiResult)}`)
     const dbUser = apiResult.data.getUser
-    const user = dbUser != null ? new User(dbUser.UserId, dbUser.NotifyToken, dbUser.NotifyTime, dbUser.SearchWords) : null
+    const user = dbUser != null ? new User(dbUser.UserId, dbUser.NotifyToken, dbUser.NotifyTime, dbUser.SearchWords, dbUser.Programs) : null
     return user
 }
 
@@ -49,6 +52,7 @@ const updateUserNotifyTokenMutation = (userId, notifyToken) =>
     `mutation {
            updateUserNotify(UserId: "${userId}", NotifyToken: "${notifyToken}") {
              UserId NotifyToken NotifyTime SearchWords
+             Programs{SearchWord Programs{Title Station ProgramId Notify Link Date}}
            }
         }`
 
@@ -66,6 +70,7 @@ const updateUserSearchWordsMutation = (userId, searchWords) =>
     `mutation {
            updateUserSearchWords(UserId: "${userId}", SearchWords: ${JSON.stringify(searchWords)}) {
              UserId NotifyToken NotifyTime SearchWords
+             Programs{SearchWord Programs{Title Station ProgramId Notify Link Date}}
            }
         }`
 

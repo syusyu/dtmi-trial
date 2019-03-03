@@ -8,8 +8,8 @@ import LineNotifyAuth from './LineNotifyAuth';
 import LineNotifyAuthCallback from './LineNotifyAuthCallback';
 import AuthCognitoRequired from './AuthCognitoRequired';
 import Amplify, {Auth} from "aws-amplify";
-import {createUserDB, fetchUserDB, updateUserNotifyTokenDB, updateUserSearchWordsDB, User, deleteUserFromStorage} from "./userInfo"
-import {awsAppSync, generateAuth, establishAuthSession} from "./awsConfig"
+import {fetchUserDB, updateUserNotifyTokenDB, updateUserSearchWordsDB, User, deleteUserFromStorage} from "./userInfo"
+import {awsAppSync} from "./awsConfig"
 
 
 Amplify.configure({

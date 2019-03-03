@@ -3,54 +3,8 @@ import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Dialog from '@material-ui/core/Dialog';
-import Input from '@material-ui/core/Input';
-import AddIcon from '@material-ui/icons/Add';
-import Fab from '@material-ui/core/Fab';
-
-import Button from '@material-ui/core/Button';
-
-
-class SearchWordDialog extends React.Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            word: null
-        }
-    }
-    close() {
-        this.props.onClose()
-    }
-
-    changeWord(event) {
-        this.setState({word: event.target.value});
-    }
-
-    addWord() {
-        this.props.onClose(this.state.word)
-    };
-
-    render() {
-        const { classes, onClose, ...other } = this.props;
-
-        return (
-            <Dialog onClose={() => this.close()} aria-labelledby="simple-dialog-title" {...other} >
-                <DialogTitle id="simple-dialog-title">Add search word</DialogTitle>
-                <div>
-                    <Input value={this.state.value} onChange={e => this.changeWord(e)} autoFocus />
-                    <Button variant="outlined" onClick={() => this.addWord()}>
-                        Add
-                    </Button>
-                </div>
-            </Dialog>
-        );
-    }
-}
 
 
 const styles = {
@@ -76,66 +30,41 @@ const styles = {
 class Program extends Component {
     constructor(props) {
         super(props);
-        console.log(`Program.searchWords=${JSON.stringify(this.props.user.searchWords)}`)
+        console.log(`Program.programs=${JSON.stringify(this.props.user.programs)}`)
         this.state = {
-            searchWords: this.props.user.searchWords || [],
-            open: false,
+            programs: this.props.user.programs || [],
         }
-    }
-    async deleteSearchWord(key) {
-        const removedSearchWords = this.state.searchWords.filter(e => e !== key)
-        this.setState({
-            searchWords: removedSearchWords
-        })
-        await this.props.updateSearchWords(removedSearchWords)
-    }
-    openDialog() {
-        this.setState({
-            open: true,
-        });
-    }
-    closeDialog(word) {
-        if (word) {
-            this.addSearchWord(word)
-        }
-        this.setState({
-            open: false,
-        });
-    }
-    async addSearchWord(word) {
-        this.state.searchWords.push(word)
-        console.log(`Program.addSearchWord.searchWords=${JSON.stringify(this.state.searchWords)}`)
-        await this.props.updateSearchWords(this.state.searchWords)
     }
     render() {
         const { classes } = this.props;
 
         return (
             <div>
-                <Grid container spacing={40} alignItems="flex-end">
-                    {this.state.searchWords.map(searchWord => (
-                        <Grid item key={searchWord} xs={12} sm={6} md={4}>
-                            <Card className={classes.card}>
-                                <CardHeader className={classes.cardHeader} action={
-                                    <IconButton onClick={() => this.deleteSearchWord(searchWord)}>
-                                        <DeleteIcon/>
-                                    </IconButton>
-                                }/>
-                                <CardContent className={classes.cardContent}>
-                                    <Typography paragraph>
-                                        {searchWord}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
+                <hr />
+                {this.state.programs.map(elem => (
+                    <div key={elem.SearchWord}>
+                        <p>{elem.SearchWord}</p>
+                        <Grid container spacing={40} alignItems="flex-end">
+                            {elem.Programs.map(program => (
+                                <Grid item key={program.ProgramId} xs={12} sm={6} md={4}>
+                                    <Card className={classes.card}>
+                                        <CardHeader className={classes.cardHeader}/>
+                                        <CardContent className={classes.cardContent}>
+                                            <Typography paragraph>
+                                                {program.Date}
+                                            </Typography>
+                                            <Typography paragraph>
+                                                {program.Station}<br />
+                                                {program.Title}
+                                                <a href={program.ProgramId}>詳細</a>
+                                            </Typography>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            ))}
                         </Grid>
-                    ))}
-                </Grid>
-                <SearchWordDialog
-                    open={this.state.open}
-                    onClose={(word) => this.closeDialog(word)}/>
-                <Fab color="primary" aria-label="Add" className={classes.fab} onClick={() => this.openDialog()}>
-                    <AddIcon />
-                </Fab>
+                    </div>
+                ))}
             </div>
         )
     }

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import SearchWord from "./SearchWord"
 import Program from "./Program"
 
 export default class User extends Component {
@@ -14,6 +15,7 @@ export default class User extends Component {
         const notifyToken = hasNotifyToken ?
             <div>
                 <p>lineNotifyToken: {this.props.user.notifyToken}</p>
+                <SearchWord {...this.props} />
                 <Program {...this.props} />
             </div> :
             <a href={url}>Get token of LINE Notify</a>
