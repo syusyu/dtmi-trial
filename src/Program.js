@@ -28,20 +28,16 @@ const styles = {
 };
 
 class Program extends Component {
-    constructor(props) {
-        super(props);
-        console.log(`Program.programs=${JSON.stringify(this.props.user.programs)}`)
-        this.state = {
-            programs: this.props.user.programs || [],
-        }
-    }
     render() {
+        // console.log(`Programs.props.programs=${JSON.stringify(this.props.user.programs)}`)
+
         const { classes } = this.props;
+        const programs = this.props.user.programs || []
 
         return (
             <div>
                 <hr />
-                {this.state.programs.map(elem => (
+                {programs.map(elem => (
                     <div key={elem.SearchWord}>
                         <p>{elem.SearchWord}</p>
                         <Grid container spacing={40} alignItems="flex-end">

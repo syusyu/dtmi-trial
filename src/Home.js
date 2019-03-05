@@ -4,11 +4,6 @@ import User from "./User"
 
 
 export default class Home extends Component {
-    constructor(props) {
-        super(props)
-        // console.log(`HOME.user=${JSON.stringify(props.user)}`)
-    }
-
     render() {
         return (
             <div>

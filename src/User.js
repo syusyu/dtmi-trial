@@ -4,6 +4,8 @@ import Program from "./Program"
 
 export default class User extends Component {
     render() {
+        // console.log(`User.props.user=${JSON.stringify(this.props.user)}`)
+
         const userLoaded = Boolean(this.props.user && this.props.user.userId)
         const hasNotifyToken = Boolean(userLoaded && this.props.user.notifyToken)
 

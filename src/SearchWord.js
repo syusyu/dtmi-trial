@@ -76,7 +76,7 @@ const styles = {
 class SearchWord extends Component {
     constructor(props) {
         super(props);
-        console.log(`SearchWord.searchWords=${JSON.stringify(this.props.user.searchWords)}`)
+        // console.log(`SearchWord.searchWords=${JSON.stringify(this.props.user.searchWords)}`)
         this.state = {
             searchWords: this.props.user.searchWords || [],
             open: false,
@@ -104,7 +104,7 @@ class SearchWord extends Component {
     }
     async addSearchWord(word) {
         this.state.searchWords.push(word)
-        console.log(`SearchWord.addSearchWord.searchWords=${JSON.stringify(this.state.searchWords)}`)
+        // console.log(`SearchWord.addSearchWord.searchWords=${JSON.stringify(this.state.searchWords)}`)
         await this.props.updateSearchWords(this.state.searchWords)
     }
     render() {

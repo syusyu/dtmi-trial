@@ -8,7 +8,7 @@ import LineNotifyAuth from './LineNotifyAuth';
 import LineNotifyAuthCallback from './LineNotifyAuthCallback';
 import AuthCognitoRequired from './AuthCognitoRequired';
 import Amplify, {Auth} from "aws-amplify";
-import {fetchUserDB, updateUserNotifyTokenDB, updateUserSearchWordsDB, User, deleteUserFromStorage} from "./userInfo"
+import {fetchUserDB, updateUserNotifyTokenDB, updateUserSearchWordsDB, User, subscribeUserPrograms} from "./userInfo"
 import {awsAppSync} from "./awsConfig"
 
 
@@ -28,16 +28,27 @@ class App extends Component {
         this.state = {
             cognitoUser: Auth.userPool ? Auth.userPool.getCurrentUser() : null,
             authenticated: Auth.userPool && Auth.userPool.getCurrentUser(),
-            user: null
+            user: null,
+            subscription: null
         }
+        this.updatePrograms = this.updatePrograms.bind(this)
     }
 
     async componentDidMount() {
         if (this.state.cognitoUser) {
             const memberUser = await fetchUserDB(this.state.cognitoUser.username)
-            this.setState({user: memberUser})
+            const subscription = await subscribeUserPrograms(memberUser, this.updatePrograms)
+            this.setState({
+                user: memberUser,
+                subscription: subscription
+            })
         }
-        console.log(`App.componentDidMount.fetched.user=${JSON.stringify(this.state.user)}`)
+        // console.log(`App.componentDidMount.fetched.user=${JSON.stringify(this.state.user)}`)
+    }
+
+    componentWillUnmount() {
+        console.log((`App.componentWillUnmount`))
+        this.state.subscription.unsubscribe()
     }
 
     hasNotifyToken() {
@@ -53,7 +64,7 @@ class App extends Component {
         this.setState({
             user: user
         })
-        console.log(`updateNotifyToken is succeeded. user=${JSON.stringify(user)}`)
+        // console.log(`updateNotifyToken is succeeded. user=${JSON.stringify(user)}`)
     }
 
     async updateSearchWords(searchWords) {
@@ -61,7 +72,17 @@ class App extends Component {
         this.setState({
             user: user
         })
-        console.log(`updateSearchWords is succeeded. user=${JSON.stringify(user)}`)
+        // console.log(`updateSearchWords is succeeded. user=${JSON.stringify(user)}`)
+    }
+
+    updatePrograms(programs) {
+        // console.log(`App.updatePrograms.programs=${JSON.stringify(programs)}`)
+        let user = this.state.user
+        user.programs = programs
+        this.setState({
+            user: user
+        })
+        // console.log(`App.updatePrograms.programs=${JSON.stringify(this.state.user.programs)}`)
     }
 
     signOut() {

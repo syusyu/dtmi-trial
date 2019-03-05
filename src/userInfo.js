@@ -26,7 +26,7 @@ const createUserMutation = (userId) =>
         }`
 export const createUserDB = async (userId) => {
     const apiResult = await API.graphql(graphqlOperation(createUserMutation(userId)))
-    console.log(`userInfo.createUserDB.apiResult=${JSON.stringify(apiResult)}`)
+    // console.log(`userInfo.createUserDB.apiResult=${JSON.stringify(apiResult)}`)
     const dbUser = apiResult.data.createUser
     const user = dbUser ? new User(dbUser.UserId) : null
     return user
@@ -42,7 +42,7 @@ const getUserQuery = (userId) =>
 
 export const fetchUserDB = async (userId) => {
     const apiResult = await API.graphql(graphqlOperation(getUserQuery(userId)))
-    console.log(`userInfo.fetchUser.apiResult=${JSON.stringify(apiResult)}`)
+    // console.log(`userInfo.fetchUser.apiResult=${JSON.stringify(apiResult)}`)
     const dbUser = apiResult.data.getUser
     const user = dbUser != null ? new User(dbUser.UserId, dbUser.NotifyToken, dbUser.NotifyTime, dbUser.SearchWords, dbUser.Programs) : null
     return user
@@ -58,7 +58,7 @@ const updateUserNotifyTokenMutation = (userId, notifyToken) =>
 
 export const updateUserNotifyTokenDB = async (user, notifyToken) => {
     const apiResult = await API.graphql(graphqlOperation(updateUserNotifyTokenMutation(user.userId, notifyToken)))
-    console.log(`userInfo.updateUserNotifyToken.apiResult=${JSON.stringify(apiResult)}`)
+    // console.log(`userInfo.updateUserNotifyToken.apiResult=${JSON.stringify(apiResult)}`)
     if (apiResult.data.updateUserNotify == null) {
         throw Error(`Failed to update notifyToken`)
     }
@@ -76,10 +76,31 @@ const updateUserSearchWordsMutation = (userId, searchWords) =>
 
 export const updateUserSearchWordsDB = async (user, searchWords) => {
     const apiResult = await API.graphql(graphqlOperation(updateUserSearchWordsMutation(user.userId, searchWords)))
-    console.log(`userInfo.updateUserSearchWordsDB.apiResult=${JSON.stringify(apiResult)}`)
+    // console.log(`userInfo.updateUserSearchWordsDB.apiResult=${JSON.stringify(apiResult)}`)
     if (apiResult.data.updateUserSearchWords == null) {
         throw Error(`Failed to update notifyToken`)
     }
     user.searchWords = searchWords
     return user
+}
+
+const subscribeUserProgramsMutation = (userId) =>
+    `subscription {
+           updatedUserPrograms(UserId: "${userId}") {
+             UserId NotifyToken NotifyTime SearchWords
+             Programs{SearchWord Programs{Title Station ProgramId Notify Link Date}}
+           }
+        }`
+
+export const subscribeUserPrograms = async (user, callback) => {
+    const subscription = await API.graphql(graphqlOperation(subscribeUserProgramsMutation(user.userId))).subscribe({
+        next: (res) => {
+            // console.log(`res=${JSON.stringify(res.value.data.updatedUserPrograms)}`)
+            callback(res.value.data.updatedUserPrograms.Programs)
+        },
+        error: (err) => {
+            console.error(err)
+        }
+    })
+    return subscription
 }
