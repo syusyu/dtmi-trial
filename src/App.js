@@ -19,10 +19,8 @@ Amplify.configure({
         userPoolWebClientId: CONFIG.COGNITO_CLIENT_ID,
         identityPoolId: CONFIG.COGNITO_IDENTITY_POOL_ID,
     },
-    API: {
-        ...awsAppSync,
-        ...awsApi,
-    }
+    ...awsApi,
+    ...awsAppSync,
 });
 
 class App extends Component {
