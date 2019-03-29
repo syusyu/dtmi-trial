@@ -84,6 +84,20 @@ export const updateUserSearchWordsDB = async (user, searchWords) => {
     return user
 }
 
+
+export const scrapePrograms = async (user) => {
+    const init = {
+        body: {'user_id': user.userId},
+        headers: {'x-api-key': 'gdvIOFZwxV3PJkI6pJrx66MP4qh7hWgv2aDyjBsI'}
+    }
+    API.post('Scraping', '/dtmi-lambda-scraping', init).then(response => {
+        console.log(`scraping succeeded. ${JSON.stringify(response)}`)
+    }).catch(error => {
+        console.log('scraping failed')
+        console.log(error)
+    });
+}
+
 const subscribeUserProgramsMutation = (userId) =>
     `subscription {
            updatedUserPrograms(UserId: "${userId}") {

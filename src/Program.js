@@ -51,8 +51,8 @@ class Program extends Component {
                                             </Typography>
                                             <Typography paragraph>
                                                 {program.Station}<br />
-                                                {program.Title}
-                                                <a href={program.ProgramId}>詳細</a>
+                                                {program.Title}<br />
+                                                <a href={program.Link} target="_blank">詳細</a>
                                             </Typography>
                                         </CardContent>
                                     </Card>

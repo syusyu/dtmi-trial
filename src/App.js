@@ -8,8 +8,8 @@ import LineNotifyAuth from './LineNotifyAuth';
 import LineNotifyAuthCallback from './LineNotifyAuthCallback';
 import AuthCognitoRequired from './AuthCognitoRequired';
 import Amplify, {Auth} from "aws-amplify";
-import {fetchUserDB, updateUserNotifyTokenDB, updateUserSearchWordsDB, User, subscribeUserPrograms} from "./userInfo"
-import {awsAppSync} from "./awsConfig"
+import {fetchUserDB, updateUserNotifyTokenDB, updateUserSearchWordsDB, User, subscribeUserPrograms, scrapePrograms} from "./userInfo"
+import {awsAppSync, awsApi} from "./awsConfig"
 
 
 Amplify.configure({
@@ -19,7 +19,10 @@ Amplify.configure({
         userPoolWebClientId: CONFIG.COGNITO_CLIENT_ID,
         identityPoolId: CONFIG.COGNITO_IDENTITY_POOL_ID,
     },
-    ...awsAppSync
+    API: {
+        ...awsAppSync,
+        ...awsApi,
+    }
 });
 
 class App extends Component {
@@ -72,7 +75,8 @@ class App extends Component {
         this.setState({
             user: user
         })
-        // console.log(`updateSearchWords is succeeded. user=${JSON.stringify(user)}`)
+        console.log(`updateSearchWords is succeeded. user=${user.userId}`)
+        await scrapePrograms(user)
     }
 
     updatePrograms(programs) {

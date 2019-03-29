@@ -63,3 +63,12 @@ export const awsAppSync =  {
     "aws_appsync_region": "ap-northeast-1",
     "aws_appsync_authenticationType": "AWS_IAM",
 };
+
+export const awsApi = {
+    endpoints: [
+        {
+            name: "Scraping",
+            endpoint: "https://cruftaxxr9.execute-api.ap-northeast-1.amazonaws.com/default"
+        }
+    ]
+}
