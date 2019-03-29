@@ -44,7 +44,6 @@ class App extends Component {
                 subscription: subscription
             })
         }
-        // console.log(`App.componentDidMount.fetched.user=${JSON.stringify(this.state.user)}`)
     }
 
     componentWillUnmount() {
